@@ -2,6 +2,7 @@
 from django.db import models
 from django.conf import settings
 from problems.models import Problem
+from languages.models import Language
 
 class Submission(models.Model):
     LANGUAGE_CHOICES = (
@@ -22,7 +23,7 @@ class Submission(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     problem = models.ForeignKey(Problem, on_delete=models.CASCADE)
     code = models.TextField()
-    language = models.CharField(max_length=20, choices=LANGUAGE_CHOICES)
+    language = models.ForeignKey(Language, on_delete=models.CASCADE)
     status = models.CharField(max_length=30, choices=STATUS_CHOICES, default='Pending')
     runtime = models.FloatField(null=True, blank=True)
     memory_usage = models.FloatField(null=True, blank=True)
