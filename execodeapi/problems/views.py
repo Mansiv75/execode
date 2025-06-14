@@ -1,7 +1,8 @@
 # problems/views.py
 from rest_framework import generics, permissions, filters
-from .models import Problem
-from .serializers import ProblemSerializer
+from .models import Problem, TestCase
+from .serializers import ProblemSerializer, TestCaseSerializer
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 class ProblemListCreateView(generics.ListCreateAPIView):
     queryset = Problem.objects.all()
@@ -24,4 +25,25 @@ class ProblemRetrieveUpdateView(generics.RetrieveUpdateAPIView):
     def perform_update(self, serializer):
         if not self.request.user.is_staff:
             raise PermissionError("Only admins can update problems.")
+        serializer.save()
+
+class ProblemTestCaseListView(generics.ListAPIView):
+    serializer_class = TestCaseSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        problem_id = self.kwargs['problem_id']
+        queryset = TestCase.objects.filter(problem__id=problem_id)
+        show_samples_only = self.request.query_params.get('samples_only')
+        if show_samples_only == 'true':
+            queryset = queryset.filter(is_sample=True)
+        return queryset
+
+class TestCaseCreateView(generics.CreateAPIView):
+    serializer_class = TestCaseSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        if not self.request.user.is_staff:
+            raise PermissionError("Only admins can add test cases.")
         serializer.save()

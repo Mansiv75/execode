@@ -21,3 +21,12 @@ class Problem(models.Model):
 
     def __str__(self):
         return self.title
+
+class TestCase(models.Model):
+    problem = models.ForeignKey('Problem', on_delete=models.CASCADE, related_name='test_cases')
+    input_data = models.TextField()
+    expected_output = models.TextField()
+    is_sample = models.BooleanField(default=False)  # True = visible on frontend
+
+    def __str__(self):
+        return f"TestCase {self.id} for {self.problem.title}"
