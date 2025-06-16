@@ -46,19 +46,22 @@ class GoogleLoginView(APIView):
             return Response({'detail': 'Token not provided'}, status=400)
 
         try:
-            idinfo = id_token.verify_oauth2_token(token_id, google_requests.Request())
-            email = idinfo['email']
-            name = idinfo.get('name', email.split('@')[0])
-
-            user, created = User.objects.get_or_create(email=email, defaults={'username': name})
-            refresh = RefreshToken.for_user(user)
-
-            return Response({
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-                'user': UserSerializer(user).data
-            })
+            return self.verify_token(token_id)
         except ValueError:
             return Response({'detail': 'Invalid token'}, status=400)
+
+    def verify_token(self, token_id):
+        idinfo = id_token.verify_oauth2_token(token_id, google_requests.Request())
+        email = idinfo['email']
+        name = idinfo.get('name', email.split('@')[0])
+
+        user, created = User.objects.get_or_create(email=email, defaults={'username': name})
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'user': UserSerializer(user).data
+        })
 
 print("GoogleLoginView loaded successfully")
