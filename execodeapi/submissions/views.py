@@ -10,9 +10,8 @@ from django.shortcuts import get_object_or_404
 # Dummy judge function (you'll replace with real execution logic later)
 def judge_submission(code, language, test_cases):
     # Simulate checking all test cases
-    for tc in test_cases:
-        if "fail" in code:  # Dummy condition
-            return "Wrong Answer", 0.2, 15.0
+    if next((True for _ in test_cases if "fail" in code), False):
+        return "Wrong Answer", 0.2, 15.0
     return "Accepted", 0.1, 12.0
 
 class SubmitSolutionView(APIView):

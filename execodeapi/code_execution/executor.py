@@ -86,53 +86,21 @@ class CodeExecutor:
             f.write(self.code)
             cpp_file = f.name
         
-        exe_file = cpp_file + '.out'
+        exe_file = f"{cpp_file}.out"
         
         try:
-            # Compile
-            compile_result = subprocess.run(
-                ['g++', '-o', exe_file, cpp_file],
-                capture_output=True,
-                text=True,
-                timeout=10
-            )
-            
-            if compile_result.returncode != 0:
-                return {
+            compile_result = self._compile_cpp(cpp_file, exe_file)
+            return (
+                {
                     'status': 'Error',
                     'output': '',
                     'error': f'Compilation Error: {compile_result.stderr}',
                     'execution_time': 0,
                     'memory_usage': 0
                 }
-            
-            # Execute
-            start_time = time.time()
-            result = subprocess.run(
-                [exe_file],
-                input=self.input_data,
-                capture_output=True,
-                text=True,
-                timeout=self.timeout
+                if compile_result.returncode != 0 else
+                self._run_cpp_executable(exe_file)
             )
-            execution_time = time.time() - start_time
-            
-            if result.returncode == 0:
-                return {
-                    'status': 'Completed',
-                    'output': result.stdout,
-                    'error': result.stderr,
-                    'execution_time': execution_time,
-                    'memory_usage': 0
-                }
-            else:
-                return {
-                    'status': 'Error',
-                    'output': result.stdout,
-                    'error': result.stderr,
-                    'execution_time': execution_time,
-                    'memory_usage': 0
-                }
                 
         except subprocess.TimeoutExpired:
             return {
@@ -147,6 +115,15 @@ class CodeExecutor:
                 if os.path.exists(file_path):
                     os.unlink(file_path)
     
+    def _compile_java(self, java_file):
+        """Compile Java file and return the result."""
+        return subprocess.run(
+            ['javac', java_file],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+
     def _execute_java(self):
         # Extract class name from code
         import re
@@ -169,51 +146,18 @@ class CodeExecutor:
                 f.write(self.code)
             
             try:
-                # Compile
-                compile_result = subprocess.run(
-                    ['javac', java_file],
-                    capture_output=True,
-                    text=True,
-                    timeout=10
-                )
-                
-                if compile_result.returncode != 0:
-                    return {
+                compile_result = self._compile_java(java_file)
+                return (
+                    {
                         'status': 'Error',
                         'output': '',
                         'error': f'Compilation Error: {compile_result.stderr}',
                         'execution_time': 0,
                         'memory_usage': 0
                     }
-                
-                # Execute
-                start_time = time.time()
-                result = subprocess.run(
-                    ['java', '-cp', temp_dir, class_name],
-                    input=self.input_data,
-                    capture_output=True,
-                    text=True,
-                    timeout=self.timeout
+                    if compile_result.returncode != 0 else
+                    self._run_java_class(temp_dir, class_name)
                 )
-                execution_time = time.time() - start_time
-                
-                if result.returncode == 0:
-                    return {
-                        'status': 'Completed',
-                        'output': result.stdout,
-                        'error': result.stderr,
-                        'execution_time': execution_time,
-                        'memory_usage': 0
-                    }
-                else:
-                    return {
-                        'status': 'Error',
-                        'output': result.stdout,
-                        'error': result.stderr,
-                        'execution_time': execution_time,
-                        'memory_usage': 0
-                    }
-                    
             except subprocess.TimeoutExpired:
                 return {
                     'status': 'Timeout',
@@ -222,3 +166,31 @@ class CodeExecutor:
                     'execution_time': self.timeout,
                     'memory_usage': 0
                 }
+
+    def _run_java_class(self, temp_dir, class_name):
+        start_time = time.time()
+        result = subprocess.run(
+            ['java', '-cp', temp_dir, class_name],
+            input=self.input_data,
+            capture_output=True,
+            text=True,
+            timeout=self.timeout
+        )
+        execution_time = time.time() - start_time
+        return (
+            {
+                'status': 'Completed',
+                'output': result.stdout,
+                'error': result.stderr,
+                'execution_time': execution_time,
+                'memory_usage': 0
+            }
+            if result.returncode == 0 else
+            {
+                'status': 'Error',
+                'output': result.stdout,
+                'error': result.stderr,
+                'execution_time': execution_time,
+                'memory_usage': 0
+            }
+        )

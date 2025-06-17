@@ -89,10 +89,15 @@ GOOGLE_CLIENT_ID = 'your-google-client-id.apps.googleusercontent.com'  # Replace
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'djongo',
+        'NAME': 'execode',  # Your database name
+        'CLIENT': {
+            # OR for MongoDB Atlas:
+            'host': 'mongodb+srv://username:password@cluster.mongodb.net/leetcode_clone?retryWrites=true&w=majority',
+        }
     }
 }
+
 
 
 # Password validation
