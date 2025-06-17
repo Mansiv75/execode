@@ -82,7 +82,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'execodeapi.wsgi.application'
-
+GOOGLE_CLIENT_ID = 'your-google-client-id.apps.googleusercontent.com'  # Replace with your actual Google Client ID
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

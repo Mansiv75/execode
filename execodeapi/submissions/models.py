@@ -1,16 +1,9 @@
-# submissions/models.py
 from django.db import models
 from django.conf import settings
 from problems.models import Problem
 from languages.models import Language
 
 class Submission(models.Model):
-    LANGUAGE_CHOICES = (
-        ('python', 'Python'),
-        ('cpp', 'C++'),
-        ('java', 'Java'),
-    )
-
     STATUS_CHOICES = (
         ('Pending', 'Pending'),
         ('Accepted', 'Accepted'),

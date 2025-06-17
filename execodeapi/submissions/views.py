@@ -1,13 +1,13 @@
-# submissions/views.py
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from submissions.models import Submission
 from problems.models import Problem, TestCase
+from languages.models import Language
 from submissions.serializers import SubmissionSerializer
 from django.shortcuts import get_object_or_404
 
-# Dummy judge function (you’ll replace with real execution logic later)
+# Dummy judge function (you'll replace with real execution logic later)
 def judge_submission(code, language, test_cases):
     # Simulate checking all test cases
     for tc in test_cases:
@@ -21,10 +21,15 @@ class SubmitSolutionView(APIView):
     def post(self, request, id):
         problem = get_object_or_404(Problem, pk=id)
         code = request.data.get('code')
-        language = request.data.get('language')
+        language_id = request.data.get('language')  # Should be language ID, not slug
 
-        if not code or not language:
+        if not code or not language_id:
             return Response({'detail': 'Code and language are required.'}, status=400)
+
+        try:
+            language = Language.objects.get(pk=language_id)
+        except Language.DoesNotExist:
+            return Response({'detail': 'Invalid language.'}, status=400)
 
         submission = Submission.objects.create(
             user=request.user,

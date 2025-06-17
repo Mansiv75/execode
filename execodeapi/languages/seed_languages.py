@@ -1,6 +1,6 @@
 # submissions/management/commands/seed_languages.py
 from django.core.management.base import BaseCommand
-from submissions.models import Language
+from languages.models import Language
 
 class Command(BaseCommand):
     def handle(self, *args, **kwargs):

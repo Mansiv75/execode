@@ -7,6 +7,8 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
+from django.conf import settings  
+
 User = get_user_model()
 
 class RegisterView(generics.CreateAPIView):
@@ -51,17 +53,22 @@ class GoogleLoginView(APIView):
             return Response({'detail': 'Invalid token'}, status=400)
 
     def verify_token(self, token_id):
-        idinfo = id_token.verify_oauth2_token(token_id, google_requests.Request())
-        email = idinfo['email']
-        name = idinfo.get('name', email.split('@')[0])
+        def verify_token(self, token_id):
+            idinfo = id_token.verify_oauth2_token(
+                token_id, 
+                google_requests.Request(), 
+                settings.GOOGLE_CLIENT_ID
+            )
+            email = idinfo['email']
+            name = idinfo.get('name', email.split('@')[0])
 
-        user, created = User.objects.get_or_create(email=email, defaults={'username': name})
-        refresh = RefreshToken.for_user(user)
+            user, created = User.objects.get_or_create(email=email, defaults={'username': name})
+            refresh = RefreshToken.for_user(user)
 
-        return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
-            'user': UserSerializer(user).data
-        })
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'user': UserSerializer(user).data
+            })
 
 print("GoogleLoginView loaded successfully")
