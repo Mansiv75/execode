@@ -11,7 +11,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 from datetime import timedelta
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -90,14 +93,12 @@ GOOGLE_CLIENT_ID = 'your-google-client-id.apps.googleusercontent.com'  # Replace
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
-        'NAME': 'execode',  # Your database name
+        'NAME': os.getenv('MONGODB_NAME', 'leetcode_clone'),
         'CLIENT': {
-            # OR for MongoDB Atlas:
-            'host': 'mongodb+srv://username:password@cluster.mongodb.net/leetcode_clone?retryWrites=true&w=majority',
+            'host': os.getenv('MONGODB_HOST', 'mongodb://localhost:27017'),
         }
     }
 }
-
 
 
 # Password validation
